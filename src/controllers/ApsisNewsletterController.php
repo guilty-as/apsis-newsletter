@@ -1,31 +1,28 @@
 <?php
 
-namespace Craft;
+namespace Guilty\Apsis\Newsletter\Controllers;
 
-use Guzzle\Http\Exception\ClientErrorResponseException;
+use craft\web\Controller;
 
-class ApsisNewsletterController extends BaseController
+class ApsisNewsletterController extends Controller
 {
-
     protected $allowAnonymous = [
         "actionHandleFormSubmission",
     ];
 
     public function actionHandleFormSubmission()
     {
-        $email = craft()->request->getQuery("email", false);
-
-        $response = craft()->apsisNewsletter->addSubscriber($email);
-
+        $email = \Craft::$app->request->get("email", false);
+        $response = \Craft::$app->apsisNewsletter->addSubscriber($email);
 
         if (!$response || $response["Code"] !== 1) {
-            return craft()->request->isAjaxRequest()
-                ? $this->returnJson(["success" => false])
+            return \Craft::$app->request->isAjax
+                ? $this->asErrorJson("Could not sign up to mailing list")
                 : $this->redirect("/?sent=false");
         }
 
-        return craft()->request->isAjaxRequest()
-            ? $this->returnJson(["success" => true])
+        return \Craft::$app->request->isAjax
+            ? $this->asJson("Succesfully signed up for mailing list")
             : $this->redirect("/?sent=true");
     }
 }
