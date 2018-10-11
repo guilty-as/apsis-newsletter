@@ -1,0 +1,29 @@
+{% import '_includes/forms' as forms %}
+
+{{ forms.lightswitchField({
+    id: 'apsisRequireDoubleOptIn',
+    name: 'apsisRequireDoubleOptIn',
+    label: 'Krev Double Opt-In'|t,
+    on: settings.apsisRequireDoubleOptIn,
+    instructions: 'Ved Double opt-in så vil brukeren motta en godkjenningsmail som di må klikke på for å bli lagt til som mottakker av nyhetsbrev.'|t
+}) }}
+
+{{ forms.selectField({
+    id: 'apsisMailingList',
+    name: 'apsisMailingList',
+    label: 'APSIS Mailing liste'|t,
+    value: settings.apsisMailingList,
+    options: mailingLists,
+    instructions: 'Hvilke mailing liste skal brukeren puttes inn i når di legger inn e-posten sin på nettsiden'|t
+}) }}
+
+{{ forms.textField({
+    id: 'apsisApiKey',
+    name: 'apsisApiKey',
+    label: 'APSIS Api nøkkel'|t,
+    value: settings.apsisApiKey,
+    instructions: 'Skriv inn API nøkkelen for din APSIS PRO konto'|t
+}) }}
+
+<hr/>
+

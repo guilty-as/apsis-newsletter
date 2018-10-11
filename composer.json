@@ -1,0 +1,43 @@
+{
+    "name": "guilty/apsis-newsletter",
+    "description": "Integration with APSIS mailinglist for Craft CMS 3",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "apsis",
+        "newsletter"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Guilty AS",
+            "homepage": "https://guilty.no"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Guilty\\Apsis\\Newsletter\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Apsis Newsletter",
+        "handle": "apsis-newsletter",
+        "hasCpSettings": true,
+        "hasCpSection": false,
+        "developer": "Guilty AS",
+        "developerEmail": "tech@guilty.no",
+        "developerUrl": "https://guilty.no",
+        "components": {
+            "apsisnewsletter": "Guilty\\Apsis\\Newsletter\\services\\ApsisNewsletterService"
+        },
+        "class": "Guilty\\Apsis\\Newsletter\\ApsisNewsletter"
+    }
+}
