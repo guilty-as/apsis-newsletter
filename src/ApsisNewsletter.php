@@ -22,7 +22,7 @@ class ApsisNewsletter extends Plugin
     /** @var ApsisNewsletter */
     public static $plugin;
 
-    public $schemaVersion = '1.0.1';
+    public $schemaVersion = '1.0.0';
 
     public function init()
     {
