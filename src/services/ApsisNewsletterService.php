@@ -67,7 +67,9 @@ class ApsisNewsletterService extends Component
         $url = "/v1/subscribers/mailinglist/{$id}/createWithDoubleOptIn";
 
         $response = $this->client->post($url, [
-            "Email" => $email,
+            'json' => [
+                'Email' => $email,
+            ],
         ]);
 
         return $this->getResponseAsJson($response);
@@ -79,7 +81,9 @@ class ApsisNewsletterService extends Component
         $url = "/v1/subscribers/mailinglist/{$id}/create";
 
         $response = $this->client->post($url, [
-            "Email" => $email,
+            'json' => [
+                'Email' => $email,
+            ],
             'query' => [
                 'updateIfExists' => $updateIfExists,
             ],
