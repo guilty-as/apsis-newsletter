@@ -34,7 +34,7 @@ class ApsisNewsletter extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['apsis/newsletter'] = 'apsisnewsletter/handleFormSubmission';
+                $event->rules['apsis/newsletter'] = 'apsis-newsletter/subscribe';
             }
         );
     }

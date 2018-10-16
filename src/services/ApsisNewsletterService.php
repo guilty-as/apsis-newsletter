@@ -6,6 +6,8 @@ use craft\base\Component;
 use Guilty\Apsis\Newsletter\ApsisNewsletter;
 use Guilty\Apsis\Newsletter\models\Settings;
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 
 class ApsisNewsletterService extends Component
 {
@@ -48,8 +50,7 @@ class ApsisNewsletterService extends Component
             ];
         }
 
-        $response = $this->client->post("mailinglists/v2/all")->getBody()->getContents();
-        $response = json_decode($response, true);
+        $response = $this->getResponseAsJson($this->client->post("mailinglists/v2/all"));
 
         return array_map(function ($data) {
             return [
@@ -63,20 +64,32 @@ class ApsisNewsletterService extends Component
     public function createSubscriberWithDoubleOptIn($email)
     {
         $id = $this->settings->apsisMailingList;
+        $url = "/v1/subscribers/mailinglist/{$id}/createWithDoubleOptIn";
 
-        return $this->client->post("/v1/subscribers/mailinglist/{$id}/createWithDoubleOptIn", [
+        $response = $this->client->post($url, [
             "Email" => $email,
         ]);
+
+        return $this->getResponseAsJson($response);
     }
 
-    public function createSubscriber($email)
+    public function createSubscriber($email, $updateIfExists = true)
     {
         $id = $this->settings->apsisMailingList;
+        $url = "/v1/subscribers/mailinglist/{$id}/create";
 
-        return $this->client->post("/v1/subscribers/mailinglist/{$id}/create?updateIfExists=true", [
+        $response = $this->client->post($url, [
             "Email" => $email,
+            'query' => [
+                'updateIfExists' => $updateIfExists,
+            ],
         ]);
+
+        return $this->getResponseAsJson($response);
     }
 
-
+    protected function getResponseAsJson(ResponseInterface $response)
+    {
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
