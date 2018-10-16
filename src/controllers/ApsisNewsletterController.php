@@ -1,14 +1,12 @@
 <?php
 
-namespace Guilty\Apsis\Newsletter\Controllers;
+namespace Guilty\Apsis\Newsletter\controllers;
 
 use craft\web\Controller;
 
 class ApsisNewsletterController extends Controller
 {
-    protected $allowAnonymous = [
-        "actionHandleFormSubmission",
-    ];
+    protected $allowAnonymous = true;
 
     public function actionHandleFormSubmission()
     {

@@ -4,82 +4,54 @@ namespace Guilty\Apsis\Newsletter;
 
 use Craft;
 use craft\base\Plugin;
+use craft\events\RegisterUrlRulesEvent;
+use craft\web\UrlManager;
 use Guilty\Apsis\Newsletter\models\Settings;
+use Guilty\Apsis\Newsletter\services\ApsisNewsletterService;
+use yii\base\Event;
 
+/**
+ * Class ApsisNewsletter
+ *
+ * @property  ApsisNewsletterService $apsisnewsletter
+ * @package Guilty\Apsis\Newsletter
+ */
 class ApsisNewsletter extends Plugin
 {
 
-    // Static Properties
-    // =========================================================================
-
-    /**
-     * @var HubspotConnector
-     */
+    /** @var ApsisNewsletter */
     public static $plugin;
 
-    // Public Properties
-    // =========================================================================
+    public $schemaVersion = '1.0.1';
 
-    /**
-     * @var string
-     */
-    public $schemaVersion = '1.0.0';
-
-    // Public Methods
-    // =========================================================================
-
-    /**
-     * @inheritdoc
-     */
     public function init()
     {
         parent::init();
+
         self::$plugin = $this;
 
-        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function (Event $event) {
-            /** @var CraftVariable $variable */
-            $variable = $event->sender;
-            $variable->set('hubspot', HubspotConnectorVariable::class);
-        });
+        Event::on(
+            UrlManager::class,
+            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+            function (RegisterUrlRulesEvent $event) {
+                $event->rules['apsis/newsletter'] = 'apsisnewsletter/handleFormSubmission';
+            }
+        );
     }
 
-    // Protected Methods
-    // =========================================================================
-
-    /**
-     * @inheritdoc
-     */
     protected function createSettingsModel()
     {
         return new Settings();
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function settingsHtml(): string
     {
         return Craft::$app->view->renderTemplate(
             'apsis-newsletter/settings',
             [
                 'settings' => $this->getSettings(),
-                "mailingLists" => craft()->apsisNewsletter->getMailingLists()
+                "mailingLists" => $this->apsisnewsletter->getMailingLists(),
             ]
         );
     }
-
-
-    public function registerSiteRoutes()
-    {
-        return [
-            'apsis/newsletter' => ['action' => 'ApsisNewsletter/handleFormSubmission'],
-        ];
-    }
-
-
-    // =========================================================================
-    // HOOKS
-    // =========================================================================
-
-
 }

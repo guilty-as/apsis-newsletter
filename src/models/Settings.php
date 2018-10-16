@@ -18,7 +18,7 @@ class Settings extends Model
             ['apsisApiKey', 'required'],
             ['apsisApiKey', 'string'],
             ['apsisMailingList', 'string'],
-            ['apsisRequireDoubleOptIn', 'bool'],
+            ['apsisRequireDoubleOptIn', 'boolean'],
         ];
     }
 }

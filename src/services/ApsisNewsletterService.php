@@ -1,112 +1,82 @@
 <?php
 
-namespace Guilty\Apsis\Newsletter;
+namespace Guilty\Apsis\Newsletter\services;
 
 use craft\base\Component;
+use Guilty\Apsis\Newsletter\ApsisNewsletter;
+use Guilty\Apsis\Newsletter\models\Settings;
 use GuzzleHttp\Client;
 
 class ApsisNewsletterService extends Component
 {
-    // Properties
-    // =========================================================================
+    /**
+     * @var \GuzzleHttp\Client
+     */
+    protected $client;
 
+    /**
+     * @var Settings
+     */
+    protected $settings;
 
-    // Public Methods
-    // =========================================================================
-
-    public function getPlugin()
+    public function init()
     {
-        return craft()->plugins->getPlugin('apsisNewsletter');
-    }
+        parent::init();
 
-    public function getSettings()
-    {
-        return $this->getPlugin()->getSettings();
-    }
+        $this->settings = ApsisNewsletter::$plugin->getSettings();
 
-    protected function getApiKey()
-    {
-        return $this->getSettings()->apsisApiKey;
-    }
-
-    protected function hasApiKey()
-    {
-        return !!$this->getSettings()->apsisApiKey;
-    }
-
-    protected function getSelectedMailingListId()
-    {
-        return $this->getSettings()->apsisMailingList;
+        $this->client = new Client([
+            "base_uri" => "http://se.api.anpdm.com/",
+            "http_errors" => false,
+            "headers" => ["Accept" => "application/json"],
+            "auth" => [$this->settings->apsisApiKey, ""],
+        ]);
     }
 
     public function addSubscriber($email)
     {
-        return $this->getSettings()->apsisRequireDoubleOptIn
+        return $this->settings->apsisRequireDoubleOptIn
             ? $this->createSubscriberWithDoubleOptIn($email)
             : $this->createSubscriber($email);
     }
 
     public function getMailingLists()
     {
-        $jsonResponse = $this->sendRequest("post", "mailinglists/v2/all");
-
-        if (!$jsonResponse) {
+        if (!$this->settings->apsisApiKey) {
             return [
-                ["label" => "Please provide an API key to make requests to the APSIS API",]
+                ["label" => "Please provide an API key to make requests to the APSIS API",],
             ];
         }
+
+        $response = $this->client->post("mailinglists/v2/all")->getBody()->getContents();
+        $response = json_decode($response, true);
 
         return array_map(function ($data) {
             return [
                 "label" => $data["Name"],
                 "value" => $data["Id"],
             ];
-        }, $jsonResponse["Result"]);
+        }, $response["Result"]);
     }
 
 
     public function createSubscriberWithDoubleOptIn($email)
     {
-        $mailingList = $this->getSelectedMailingListId();
-        return $this->sendRequest("post", "/v1/subscribers/mailinglist/" . $mailingList . "/createWithDoubleOptIn", [
-            "Email" => $email
+        $id = $this->settings->apsisMailingList;
+
+        return $this->client->post("/v1/subscribers/mailinglist/{$id}/createWithDoubleOptIn", [
+            "Email" => $email,
         ]);
     }
 
     public function createSubscriber($email)
     {
-        $mailingList = $this->getSelectedMailingListId();
-        return $this->sendRequest("post", "/v1/subscribers/mailinglist/" . $mailingList . "/create?updateIfExists=true", [
-            "Email" => $email
+        $id = $this->settings->apsisMailingList;
+
+        return $this->client->post("/v1/subscribers/mailinglist/{$id}/create?updateIfExists=true", [
+            "Email" => $email,
         ]);
     }
 
-    protected function sendRequest($method, $resource, $body = false)
-    {
-        if (!$this->hasApiKey()) {
-            return false;
-        }
 
-
-        try {
-            $client = new Client("http://se.api.anpdm.com/");
-
-            $request = $client->createRequest($method, $resource);
-            $request->setHeader('Accept', 'application/json');
-            $request->setAuth($this->getApiKey(), '');
-
-            if ($body) {
-                $request->setBody(json_encode($body), "application/json");
-            }
-
-
-            $response = $request->send();
-
-            return $response->json();
-        } catch (\Exception $exception) {
-            Craft::log($exception->getResponse()->getBody(true));
-            Craft::log($exception);
-            return false;
-        }
-    }
 }
