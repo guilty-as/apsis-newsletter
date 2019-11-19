@@ -52,6 +52,6 @@ class SubscribeController extends Controller
      */
     protected function isSuccessResponse($response)
     {
-        return (!$response || $response["Code"] !== 1);
+        return ($response && $response["Code"] == 1);
     }
 }
